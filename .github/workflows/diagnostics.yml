@@ -1,0 +1,43 @@
+name: "Repo Diagnostics Run"
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Git Info
+        run: |
+          echo "Repo: $GITHUB_REPOSITORY";
+          echo "Event: $GITHUB_EVENT_NAME";
+          git rev-parse --abbrev-ref HEAD || true;
+
+      - name: Show Environment
+        run: |
+          uname -a || true;
+          node -v || true;
+          npm -v || true;
+
+      - name: List frontend dir
+        run: |
+          echo "Listing repo root"; ls -la || true;
+          echo "Listing frontend/"; ls -la frontend || true;
+
+      - name: Check package.json
+        run: |
+          if [ -f frontend/package.json ] ; then
+            cat frontend/package.json | jq '{name:.name, scripts:.scripts}' || true
+          fi
+
+      - name: Try build (dry)
+        working-directory: frontend
+        continue-on-error: true
+        run: |
+          echo "Install"; npm ci || npm i || true
+          echo "Build"; npm run build -- --base ./ || true
