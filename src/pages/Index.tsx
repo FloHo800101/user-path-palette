@@ -52,10 +52,10 @@ const Index = () => {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-semibold text-foreground mb-2">
-                Clients overview
+                Mandantenübersicht
               </h1>
               <p className="text-muted-foreground">
-                Key metrics for all clients you manage
+                Wesentliche Kennzahlen für alle von Ihnen betreuten Mandanten
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -77,7 +77,7 @@ const Index = () => {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search clients…"
+                placeholder="Mandanten suchen…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 bg-background"
@@ -85,16 +85,16 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground whitespace-nowrap">
-                Sort by:
+                Sortieren nach:
               </span>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px] bg-background">
+                <SelectTrigger className="w-[220px] bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border z-50">
                   <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="unmatched">Most unmatched items</SelectItem>
-                  <SelectItem value="workload">Highest workload</SelectItem>
+                  <SelectItem value="unmatched">Meiste offene Posten</SelectItem>
+                  <SelectItem value="workload">Höchste Arbeitslast</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -113,7 +113,7 @@ const Index = () => {
         {filteredClients.length === 0 && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
-              No clients found matching your search.
+              Keine Mandanten gefunden, die Ihrer Suche entsprechen.
             </p>
           </div>
         )}

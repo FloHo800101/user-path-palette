@@ -31,10 +31,10 @@ const ClientDetail = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Client not found
+            Mandant nicht gefunden
           </h1>
           <Link to="/">
-            <Button variant="outline">Back to clients</Button>
+            <Button variant="outline">Zurück zur Mandantenübersicht</Button>
           </Link>
         </div>
       </div>
@@ -42,7 +42,7 @@ const ClientDetail = () => {
   }
 
   const statusColor = client.status === "on-track" ? "success" : "warning";
-  const statusLabel = client.status === "on-track" ? "On track" : "At risk";
+  const statusLabel = client.status === "on-track" ? "Im Plan" : "Kritisch";
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,7 +54,7 @@ const ClientDetail = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/">Clients</Link>
+                    <Link to="/">Mandanten</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
@@ -67,7 +67,7 @@ const ClientDetail = () => {
             </Breadcrumb>
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back to clients
+              Zurück zur Mandantenübersicht
             </Link>
           </div>
         </div>
@@ -90,13 +90,13 @@ const ClientDetail = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="march-2026">March 2026</SelectItem>
-                    <SelectItem value="february-2026">February 2026</SelectItem>
-                    <SelectItem value="january-2026">January 2026</SelectItem>
+                    <SelectItem value="march-2026">März 2026</SelectItem>
+                    <SelectItem value="february-2026">Februar 2026</SelectItem>
+                    <SelectItem value="january-2026">Januar 2026</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Last updated: 12 minutes ago
+                  Zuletzt aktualisiert: vor 12 Minuten
                 </p>
               </div>
             </div>
@@ -110,7 +110,7 @@ const ClientDetail = () => {
           <Card className="bg-background border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Bank transactions (period)
+                Bankbuchungen (Zeitraum)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -123,7 +123,7 @@ const ClientDetail = () => {
           <Card className="bg-background border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Unmatched transactions
+                Nicht zugeordnete Buchungen
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -143,7 +143,7 @@ const ClientDetail = () => {
                       : "bg-warning/10 text-warning hover:bg-warning/20"
                   }
                 >
-                  {client.unmatchedBankTransactions < 10 ? "Low" : "High"}
+                  {client.unmatchedBankTransactions < 10 ? "Niedrig" : "Hoch"}
                 </Badge>
               </div>
             </CardContent>
@@ -152,7 +152,7 @@ const ClientDetail = () => {
           <Card className="bg-background border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Unmatched receipts
+                Nicht zugeordnete Belege
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -165,7 +165,7 @@ const ClientDetail = () => {
           <Card className="bg-background border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Receipt completeness
+                Belegvollständigkeit
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -187,10 +187,10 @@ const ClientDetail = () => {
           <div>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-2">
-                Open work for this client
+                Offene Arbeiten für diesen Mandanten
               </h2>
               <p className="text-sm text-muted-foreground">
-                Use these shortcuts to jump into the detailed views.
+                Nutzen Sie diese Verknüpfungen, um zu den Detailansichten zu gelangen.
               </p>
             </div>
 
@@ -198,25 +198,24 @@ const ClientDetail = () => {
               <Card className="bg-card border-border">
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    Unmatched transactions
+                    Nicht zugeordnete Buchungen
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
                       <div className="text-2xl font-semibold text-foreground mb-2">
-                        {client.unmatchedBankTransactions} open
+                        {client.unmatchedBankTransactions} offen
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Bank transactions that need to be matched with receipts
-                        or invoices.
+                        Bankbuchungen, die mit Belegen oder Rechnungen abgeglichen werden müssen.
                       </p>
                     </div>
                     <Button 
                       className="w-full"
                       onClick={() => navigate(`/clients/${id}/matching`)}
                     >
-                      Go to matching
+                      Zur Zuordnung
                     </Button>
                   </div>
                 </CardContent>
@@ -224,17 +223,16 @@ const ClientDetail = () => {
 
               <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg">Unmatched receipts</CardTitle>
+                  <CardTitle className="text-lg">Nicht zugeordnete Belege</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
                       <div className="text-2xl font-semibold text-foreground mb-2">
-                        {client.unmatchedReceipts} missing
+                        {client.unmatchedReceipts} fehlend
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        Receipts that have not yet been uploaded or assigned to
-                        transactions.
+                        Belege, die noch nicht hochgeladen oder Buchungen zugeordnet wurden.
                       </p>
                     </div>
                     <Button
@@ -242,7 +240,7 @@ const ClientDetail = () => {
                       variant="outline"
                       onClick={() => navigate(`/clients/${id}/matching?filter=unmatched`)}
                     >
-                      Go to missing receipts
+                      Zu fehlenden Belegen
                     </Button>
                   </div>
                 </CardContent>
@@ -254,20 +252,20 @@ const ClientDetail = () => {
           <div>
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-foreground mb-2">
-                Risk & reminders
+                Risiko & Erinnerungen
               </h2>
             </div>
 
             <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-lg">Status overview</CardTitle>
+                <CardTitle className="text-lg">Statusübersicht</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-foreground">
-                        Receipt completeness
+                        Belegvollständigkeit
                       </span>
                       <Badge
                         variant={
@@ -287,7 +285,7 @@ const ClientDetail = () => {
                       className="h-2"
                     />
                     <p className="text-sm text-muted-foreground mt-2">
-                      {client.receiptCompleteness}% of receipts are matched
+                      {client.receiptCompleteness}% der Belege sind zugeordnet
                     </p>
                   </div>
 
@@ -295,21 +293,21 @@ const ClientDetail = () => {
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm font-medium text-foreground mb-1">
-                          VAT return deadline
+                          USt-Voranmeldungs-Frist
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {client.vatType === "Monthly VAT filer"
-                            ? "10 April 2026"
-                            : "10 May 2026"}
+                          {client.vatType === "Monatlicher USt-Melder"
+                            ? "10. April 2026"
+                            : "10. Mai 2026"}
                         </p>
                       </div>
 
                       <div>
                         <p className="text-sm font-medium text-foreground mb-1">
-                          Chasing effort
+                          Erinnerungsaufwand
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Client reminders this period:{" "}
+                          Mandanten-Erinnerungen in diesem Zeitraum:{" "}
                           {client.status === "on-track" ? "1" : "3"}
                         </p>
                       </div>

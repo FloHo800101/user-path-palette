@@ -13,10 +13,10 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navigationItems = [
-  { title: "Clients", url: "/", icon: Users },
-  { title: "Inbox", url: "/inbox", icon: Inbox },
+  { title: "Mandanten", url: "/", icon: Users },
+  { title: "Posteingang", url: "/inbox", icon: Inbox },
   { title: "Dashboards", url: "/dashboards", icon: LayoutDashboard },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Einstellungen", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -24,7 +24,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border">
       <div className="p-6">
         <h1 className="text-lg font-semibold text-sidebar-foreground">
-          Receipt Matching Assistant
+          Belegzuordnung Assistent
         </h1>
       </div>
 
@@ -61,7 +61,7 @@ export function AppSidebar() {
           </Avatar>
           <div className="flex flex-col">
             <span className="text-sm font-medium text-sidebar-foreground">Sabine Kramer</span>
-            <span className="text-xs text-muted-foreground">Tax clerk</span>
+            <span className="text-xs text-muted-foreground">Steuerfachangestellte</span>
           </div>
         </div>
       </SidebarFooter>
