@@ -12,6 +12,8 @@ import Matching from "./pages/Matching";
 import Inbox from "./pages/Inbox";
 import MandantDashboard from "./pages/MandantDashboard";
 import MandantTransactions from "./pages/MandantTransactions";
+import MandantBelegUpload from "./pages/MandantBelegUpload";
+import MandantBelege from "./pages/MandantBelege";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
                   <Route path="/clients/:id/matching" element={<Matching />} />
                   <Route path="/mandant/dashboard" element={<MandantDashboard />} />
                   <Route path="/mandant/konto-vorgaenge" element={<MandantTransactions />} />
+                  <Route path="/mandant/beleg-upload" element={<MandantBelegUpload />} />
+                  <Route path="/mandant/belege" element={<MandantBelege />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

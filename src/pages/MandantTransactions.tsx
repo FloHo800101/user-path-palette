@@ -64,11 +64,14 @@ export default function MandantTransactions() {
         }
       }
 
-      // Status filter
+      // Status filter - enhanced
       if (statusFilter === "open" && transaction.status !== "offen") {
         return false;
       }
-      if (statusFilter === "eingereicht" && transaction.status !== "eingereicht") {
+      if (statusFilter === "with-receipt" && !transaction.attachments?.length) {
+        return false;
+      }
+      if (statusFilter === "done" && transaction.status !== "erledigt") {
         return false;
       }
 
@@ -163,9 +166,9 @@ export default function MandantTransactions() {
       case 'offen':
         return <Badge variant="destructive" className="text-xs">Offen</Badge>;
       case 'eingereicht':
-        return <Badge variant="secondary" className="text-xs">Eingereicht</Badge>;
+        return <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700">Beleg vorhanden</Badge>;
       case 'erledigt':
-        return <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700">Erledigt</Badge>;
+        return <Badge variant="secondary" className="text-xs">Erledigt</Badge>;
     }
   };
 
@@ -204,15 +207,19 @@ export default function MandantTransactions() {
               className="w-64"
             />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">Alle anzeigen</SelectItem>
                 <SelectItem value="open">Nur offene</SelectItem>
-                <SelectItem value="eingereicht">Eingereichte</SelectItem>
-                <SelectItem value="all">Alle</SelectItem>
+                <SelectItem value="with-receipt">Nur mit Beleg</SelectItem>
+                <SelectItem value="done">Erledigt</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline">
+              Kontoauszug hochladen
+            </Button>
           </div>
         </div>
 
