@@ -11,6 +11,7 @@ import ClientDetail from "./pages/ClientDetail";
 import Matching from "./pages/Matching";
 import Inbox from "./pages/Inbox";
 import MandantDashboard from "./pages/MandantDashboard";
+import MandantTransactions from "./pages/MandantTransactions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
                   <Route path="/clients/:id" element={<ClientDetail />} />
                   <Route path="/clients/:id/matching" element={<Matching />} />
                   <Route path="/mandant/dashboard" element={<MandantDashboard />} />
+                  <Route path="/mandant/konto-vorgaenge" element={<MandantTransactions />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

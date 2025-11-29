@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   currentVatPeriod,
   periodsNeedingAttention,
@@ -9,11 +10,17 @@ import {
 } from "@/data/mockMandantDashboard";
 
 export default function MandantDashboard() {
+  const navigate = useNavigate();
+  
   const today = new Date().toLocaleDateString('de-DE', {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
   });
+
+  const handlePeriodClick = (month: string, year: number) => {
+    navigate(`/mandant/konto-vorgaenge?month=${encodeURIComponent(month)}&year=${year}`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -41,7 +48,10 @@ export default function MandantDashboard() {
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Aktueller UStVA-Zeitraum
           </h3>
-          <Card className="border-2">
+          <Card 
+            className="border-2 cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handlePeriodClick(currentVatPeriod.month, currentVatPeriod.year)}
+          >
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
@@ -95,7 +105,11 @@ export default function MandantDashboard() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {periodsNeedingAttention.map((period, idx) => (
-              <Card key={idx} className="border-destructive/30">
+              <Card 
+                key={idx} 
+                className="border-destructive/30 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handlePeriodClick(period.month, period.year)}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg">
