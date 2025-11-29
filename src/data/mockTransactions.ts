@@ -23,6 +23,11 @@ export interface Transaction {
   suggestedReceipt?: Receipt;
   availableReceipts?: Receipt[];
   lastRequest?: ClientRequest;
+  // Mandant information
+  classification?: 'Geschäftlich' | 'Privat' | 'Gemischt';
+  isRecurring?: boolean;
+  notifyAdvisor?: boolean;
+  attachments?: string[];
 }
 
 export const mockReceipts: Receipt[] = [
@@ -110,6 +115,9 @@ export const mockTransactions: Transaction[] = [
     status: "suggestion",
     suggestedReceipt: mockReceipts[1],
     availableReceipts: [],
+    classification: 'Geschäftlich',
+    attachments: ['Rechnung_Telekom_März_2026.pdf'],
+    isRecurring: true,
   },
   {
     id: "t4",
@@ -144,6 +152,9 @@ export const mockTransactions: Transaction[] = [
     description: "CASH WITHDRAWAL",
     status: "unmatched",
     availableReceipts: [mockReceipts[4]],
+    classification: 'Geschäftlich',
+    notifyAdvisor: true,
+    attachments: ['Quittung_Barabhebung.jpg'],
   },
   {
     id: "t8",
@@ -171,6 +182,8 @@ export const mockTransactions: Transaction[] = [
     status: "suggestion",
     suggestedReceipt: mockReceipts[6],
     availableReceipts: [],
+    classification: 'Geschäftlich',
+    attachments: ['Mietwagen_Rechnung.pdf', 'Tankbeleg.pdf'],
   },
   {
     id: "t11",
