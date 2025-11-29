@@ -559,16 +559,17 @@ Your Tax Office`;
             {(selectedTransaction.classification || 
               selectedTransaction.isRecurring || 
               selectedTransaction.notifyAdvisor || 
+              selectedTransaction.advisorMessage ||
               selectedTransaction.attachments?.length) && (
               <Card className="bg-card border-border mb-4">
                 <CardHeader>
                   <CardTitle className="text-lg">Informationen vom Mandanten</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   {selectedTransaction.classification && (
                     <div className="flex items-start gap-2">
-                      <span className="text-sm text-muted-foreground min-w-[140px]">
-                        Klassifikation:
+                      <span className="text-sm text-muted-foreground min-w-[160px]">
+                        Klassifikation (Mandant):
                       </span>
                       <span className="text-sm font-medium">
                         {selectedTransaction.classification}
@@ -589,6 +590,24 @@ Your Tax Office`;
                       <span className="text-sm text-muted-foreground">
                         ✓ Mandant wünscht eine Rückmeldung der Kanzlei.
                       </span>
+                    </div>
+                  )}
+                  
+                  {selectedTransaction.advisorMessage && (
+                    <div className="space-y-2 pt-2 border-t">
+                      <span className="text-sm font-medium text-foreground block">
+                        Nachricht des Mandanten:
+                      </span>
+                      <Textarea
+                        readOnly
+                        value={selectedTransaction.advisorMessage}
+                        className="min-h-[120px] text-sm bg-muted resize-none"
+                      />
+                      {selectedTransaction.advisorMessageTimestamp && (
+                        <p className="text-xs text-muted-foreground">
+                          Gesendet am {selectedTransaction.advisorMessageTimestamp}
+                        </p>
+                      )}
                     </div>
                   )}
                   

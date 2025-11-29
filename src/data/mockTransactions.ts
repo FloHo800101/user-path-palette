@@ -24,10 +24,12 @@ export interface Transaction {
   availableReceipts?: Receipt[];
   lastRequest?: ClientRequest;
   // Mandant information
-  classification?: 'Geschäftlich' | 'Privat' | 'Gemischt';
+  classification?: 'Geschäftlich' | 'Privat' | 'Zahlungsdienstleister' | 'Sonstiges';
   isRecurring?: boolean;
   notifyAdvisor?: boolean;
   attachments?: string[];
+  advisorMessage?: string;
+  advisorMessageTimestamp?: string;
 }
 
 export const mockReceipts: Receipt[] = [

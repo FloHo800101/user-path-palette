@@ -28,7 +28,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { X, Upload, Camera, FileUp } from "lucide-react";
+import { X, Upload, Camera, FileUp, Building2, User, CreditCard, HelpCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { mandantTransactions, MandantTransaction } from "@/data/mockMandantTransactions";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,10 +50,12 @@ export default function MandantTransactions() {
   const [detailsPanelOpen, setDetailsPanelOpen] = useState(false);
   
   // Form state
-  const [editedClassification, setEditedClassification] = useState<'Geschäftlich' | 'Privat' | 'Gemischt'>('Geschäftlich');
+  const [editedClassification, setEditedClassification] = useState<'Geschäftlich' | 'Privat' | 'Zahlungsdienstleister' | 'Sonstiges'>('Geschäftlich');
   const [editedIsRecurring, setEditedIsRecurring] = useState(false);
   const [editedNotifyAdvisor, setEditedNotifyAdvisor] = useState(false);
+  const [editedAdvisorMessage, setEditedAdvisorMessage] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [messageError, setMessageError] = useState('');
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(transaction => {
@@ -98,12 +101,29 @@ export default function MandantTransactions() {
     setEditedClassification(transaction.classification || 'Geschäftlich');
     setEditedIsRecurring(transaction.isRecurring || false);
     setEditedNotifyAdvisor(transaction.notifyAdvisor || false);
+    setEditedAdvisorMessage(transaction.advisorMessage || '');
     setUploadedFiles(transaction.attachments || []);
+    setMessageError('');
     setDetailsPanelOpen(true);
   };
 
   const handleSaveTransaction = () => {
     if (selectedTransaction) {
+      // Validation: if notify advisor is checked, message should not be empty
+      if (editedNotifyAdvisor && !editedAdvisorMessage.trim()) {
+        setMessageError('Bitte geben Sie eine kurze Nachricht ein oder deaktivieren Sie die Benachrichtigung.');
+        return;
+      }
+      
+      const now = new Date();
+      const timestamp = now.toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
       setTransactions(prev =>
         prev.map(t =>
           t.id === selectedTransaction.id
@@ -112,6 +132,8 @@ export default function MandantTransactions() {
                 classification: editedClassification,
                 isRecurring: editedIsRecurring,
                 notifyAdvisor: editedNotifyAdvisor,
+                advisorMessage: editedNotifyAdvisor && editedAdvisorMessage.trim() ? editedAdvisorMessage : undefined,
+                advisorMessageTimestamp: editedNotifyAdvisor && editedAdvisorMessage.trim() ? timestamp : undefined,
                 attachments: uploadedFiles,
                 status: uploadedFiles.length > 0 ? 'eingereicht' as const : t.status
               }
@@ -126,12 +148,14 @@ export default function MandantTransactions() {
       });
       setDetailsPanelOpen(false);
       setSelectedTransaction(null);
+      setMessageError('');
     }
   };
 
   const handleCancelEdit = () => {
     setDetailsPanelOpen(false);
     setSelectedTransaction(null);
+    setMessageError('');
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,7 +297,34 @@ export default function MandantTransactions() {
                     <TableCell className="text-right">
                       {formatCurrency(transaction.vat)}
                     </TableCell>
-                    <TableCell>{transaction.classification}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {transaction.classification === 'Geschäftlich' && (
+                          <>
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">Geschäftlich</span>
+                          </>
+                        )}
+                        {transaction.classification === 'Privat' && (
+                          <>
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">Privat</span>
+                          </>
+                        )}
+                        {transaction.classification === 'Zahlungsdienstleister' && (
+                          <>
+                            <CreditCard className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">Zahlungsdienstleister</span>
+                          </>
+                        )}
+                        {transaction.classification === 'Sonstiges' && (
+                          <>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">Sonstiges</span>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{getStatusBadge(transaction.status)}</TableCell>
                     <TableCell className="text-right">
                       {transaction.status === 'offen' ? (
@@ -417,7 +468,8 @@ export default function MandantTransactions() {
                     <SelectContent>
                       <SelectItem value="Geschäftlich">Geschäftlich</SelectItem>
                       <SelectItem value="Privat">Privat</SelectItem>
-                      <SelectItem value="Gemischt">Gemischt</SelectItem>
+                      <SelectItem value="Zahlungsdienstleister">Zahlungsdienstleister</SelectItem>
+                      <SelectItem value="Sonstiges">Sonstiges</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -445,23 +497,63 @@ export default function MandantTransactions() {
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id="notify"
-                      checked={editedNotifyAdvisor}
-                      onCheckedChange={(checked) => setEditedNotifyAdvisor(checked as boolean)}
-                    />
-                    <div className="grid gap-1.5 leading-none">
-                      <label
-                        htmlFor="notify"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                      >
-                        Steuerberater benachrichtigen
-                      </label>
-                      <p className="text-xs text-muted-foreground">
-                        Die Kanzlei wird über die vorgenommenen Änderungen informiert (simuliert).
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id="notify"
+                        checked={editedNotifyAdvisor}
+                        onCheckedChange={(checked) => {
+                          setEditedNotifyAdvisor(checked as boolean);
+                          if (!checked) {
+                            setMessageError('');
+                          }
+                        }}
+                      />
+                      <div className="grid gap-1.5 leading-none">
+                        <label
+                          htmlFor="notify"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                          Steuerberater benachrichtigen
+                        </label>
+                        <p className="text-xs text-muted-foreground">
+                          Die Kanzlei wird über die vorgenommenen Änderungen informiert (simuliert).
+                        </p>
+                      </div>
                     </div>
+
+                    {editedNotifyAdvisor && (
+                      <div className="ml-7 space-y-2">
+                        <Label htmlFor="advisorMessage" className="text-sm">
+                          Nachricht an Ihre Kanzlei
+                        </Label>
+                        <Textarea
+                          id="advisorMessage"
+                          placeholder="z. B. Hinweis zur Rechnung, Teilzahlung, privater Anteil …"
+                          value={editedAdvisorMessage}
+                          onChange={(e) => {
+                            setEditedAdvisorMessage(e.target.value);
+                            if (messageError) setMessageError('');
+                          }}
+                          className="min-h-[100px]"
+                        />
+                        {messageError && (
+                          <p className="text-xs text-destructive">{messageError}</p>
+                        )}
+                        {selectedTransaction?.advisorMessage && (
+                          <div className="pt-2 space-y-1">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Zuletzt an Ihre Kanzlei gesendete Nachricht:
+                            </p>
+                            <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                              {selectedTransaction.advisorMessage.length > 100
+                                ? selectedTransaction.advisorMessage.substring(0, 100) + '...'
+                                : selectedTransaction.advisorMessage}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
