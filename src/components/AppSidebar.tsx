@@ -22,9 +22,9 @@ const taxClerkNavigation = [
 
 const clientNavigation = [
   { title: "Dashboard", url: "/mandant/dashboard", icon: LayoutDashboard },
-  { title: "Beleg-Upload", url: "/mandant/upload", icon: Upload },
+  { title: "Beleg-Upload", url: "/mandant/beleg-upload", icon: Upload },
   { title: "Konto-Vorgänge", url: "/mandant/konto-vorgaenge", icon: CreditCard },
-  { title: "Belege", url: "/mandant/receipts", icon: FileText },
+  { title: "Belege", url: "/mandant/belege", icon: FileText },
   { title: "Abos & Verträge", url: "/mandant/subscriptions", icon: FolderOpen },
 ];
 
