@@ -9,6 +9,11 @@ export interface Receipt {
   description: string;
 }
 
+export interface ClientRequest {
+  timestamp: string;
+  message: string;
+}
+
 export interface Transaction {
   id: string;
   date: string;
@@ -17,6 +22,7 @@ export interface Transaction {
   status: TransactionStatus;
   suggestedReceipt?: Receipt;
   availableReceipts?: Receipt[];
+  lastRequest?: ClientRequest;
 }
 
 export const mockReceipts: Receipt[] = [

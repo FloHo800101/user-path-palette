@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { mockClients } from "@/data/mockClients";
-import { mockTransactions, Transaction } from "@/data/mockTransactions";
+import { mockTransactions, Transaction, ClientRequest } from "@/data/mockTransactions";
 import { ChevronRight, Search, CheckCircle2, AlertCircle, HelpCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,7 @@ const Matching = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
 
   // Initialize filter from URL params
   useEffect(() => {
@@ -115,18 +116,49 @@ const Matching = () => {
   };
 
   const handleGenerateRequest = () => {
+    // Generate default message
+    const defaultMessage = `Dear ${client?.name},
+
+We are missing receipts for the following transactions in March 2026:
+
+${selectedTransactions
+  .map(
+    (t) =>
+      `• ${new Date(t.date).toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })} - €${t.amount.toFixed(2)} - ${t.description}`
+  )
+  .join("\n")}
+
+Please provide the missing receipts at your earliest convenience.
+
+Best regards,
+Your Tax Office`;
+    
+    setRequestMessage(defaultMessage);
     setIsRequestModalOpen(true);
   };
 
   const handleConfirmRequest = () => {
-    // Update status of selected transactions to "waiting"
+    const timestamp = new Date().toISOString();
+    const clientRequest: ClientRequest = {
+      timestamp,
+      message: requestMessage,
+    };
+
+    // Update status and store request data for selected transactions
     setTransactions((prev) =>
       prev.map((t) =>
-        selectedIds.has(t.id) ? { ...t, status: "waiting" as const } : t
+        selectedIds.has(t.id) 
+          ? { ...t, status: "waiting" as const, lastRequest: clientRequest } 
+          : t
       )
     );
     setSelectedIds(new Set());
     setIsRequestModalOpen(false);
+    setRequestMessage("");
   };
 
   const selectedTransactions = transactions.filter((t) => selectedIds.has(t.id));
@@ -505,6 +537,39 @@ const Matching = () => {
               </Card>
             )}
 
+            {/* Client request section (only for "waiting" status) */}
+            {selectedTransaction.status === "waiting" && selectedTransaction.lastRequest && (
+              <Card className="bg-card border-border mb-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">Client request</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Last request sent:</span>
+                    <span className="text-sm font-medium ml-2">
+                      {new Date(selectedTransaction.lastRequest.timestamp).toLocaleString("de-DE", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-2 block">
+                      Message sent:
+                    </label>
+                    <Textarea
+                      readOnly
+                      value={selectedTransaction.lastRequest.message}
+                      className="min-h-[200px] font-mono text-sm bg-background resize-none"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Other available receipts */}
             {selectedTransaction.availableReceipts &&
               selectedTransaction.availableReceipts.length > 0 && (
@@ -560,30 +625,13 @@ const Matching = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">
-                Request preview
+                Message to client
               </label>
               <Textarea
-                readOnly
-                value={`Dear ${client?.name},
-
-We are missing receipts for the following transactions in March 2026:
-
-${selectedTransactions
-  .map(
-    (t) =>
-      `• ${new Date(t.date).toLocaleDateString("de-DE", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })} - €${t.amount.toFixed(2)} - ${t.description}`
-  )
-  .join("\n")}
-
-Please provide the missing receipts at your earliest convenience.
-
-Best regards,
-Your Tax Office`}
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
                 className="min-h-[300px] font-mono text-sm bg-background"
+                placeholder="Edit the message to send to the client..."
               />
             </div>
           </div>
