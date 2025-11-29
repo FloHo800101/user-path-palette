@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import ClientDetail from "./pages/ClientDetail";
 import Matching from "./pages/Matching";
+import Inbox from "./pages/Inbox";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <div className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/inbox" element={<Inbox />} />
                 <Route path="/clients/:id" element={<ClientDetail />} />
                 <Route path="/clients/:id/matching" element={<Matching />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
