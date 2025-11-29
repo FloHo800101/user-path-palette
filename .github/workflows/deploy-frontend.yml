@@ -37,8 +37,16 @@ jobs:
       - name: Prepare Pages artifact (SPA fallback + nojekyll)
         run: |
           DIST=frontend/dist
+          echo "dist exists: $(test -d $DIST && echo yes || echo no)"
+          ls -la $DIST || true
+          head -n 40 $DIST/index.html || true
           cp "$DIST/index.html" "$DIST/404.html" || true
           touch "$DIST/.nojekyll"
+
+      - name: Show dist asset JS file
+        run: |
+          DIST=frontend/dist
+          grep -o "src=\".*\.js\"" $DIST/index.html || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
