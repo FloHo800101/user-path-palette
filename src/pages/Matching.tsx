@@ -68,10 +68,10 @@ const Matching = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Client not found
+            Mandant nicht gefunden
           </h1>
           <Link to="/">
-            <Button variant="outline">Back to clients</Button>
+            <Button variant="outline">Zurück zur Mandantenübersicht</Button>
           </Link>
         </div>
       </div>
@@ -169,28 +169,28 @@ Your Tax Office`;
         return (
           <Badge className="bg-success/10 text-success hover:bg-success/20">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            Matched
+            Zugeordnet
           </Badge>
         );
       case "suggestion":
         return (
           <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
             <HelpCircle className="h-3 w-3 mr-1" />
-            Suggestion
+            Vorschlag
           </Badge>
         );
       case "unmatched":
         return (
           <Badge className="bg-warning/10 text-warning hover:bg-warning/20">
             <AlertCircle className="h-3 w-3 mr-1" />
-            Unmatched
+            Nicht zugeordnet
           </Badge>
         );
       case "waiting":
         return (
           <Badge className="bg-muted text-muted-foreground hover:bg-muted/80">
             <Clock className="h-3 w-3 mr-1" />
-            Waiting for client
+            Wartet auf Mandanten
           </Badge>
         );
       default:
@@ -207,7 +207,7 @@ Your Tax Office`;
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/">Clients</Link>
+                  <Link to="/">Mandanten</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator>
@@ -222,7 +222,7 @@ Your Tax Office`;
                 <ChevronRight className="h-4 w-4" />
               </BreadcrumbSeparator>
               <BreadcrumbItem>
-                <BreadcrumbPage>Matching</BreadcrumbPage>
+                <BreadcrumbPage>Zuordnung</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -235,10 +235,10 @@ Your Tax Office`;
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-semibold text-foreground mb-2">
-                Matching – {client.name}
+                Zuordnung – {client.name}
               </h1>
               <p className="text-muted-foreground">
-                Match bank transactions with receipts
+                Bankbuchungen Belegen zuordnen
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -248,13 +248,13 @@ Your Tax Office`;
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="march-2026">March 2026</SelectItem>
-                    <SelectItem value="february-2026">February 2026</SelectItem>
-                    <SelectItem value="january-2026">January 2026</SelectItem>
+                    <SelectItem value="march-2026">März 2026</SelectItem>
+                    <SelectItem value="february-2026">Februar 2026</SelectItem>
+                    <SelectItem value="january-2026">Januar 2026</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {matchedCount} of {totalCount} transactions matched
+                  {matchedCount} von {totalCount} Buchungen zugeordnet
                 </p>
               </div>
             </div>
@@ -269,28 +269,28 @@ Your Tax Office`;
           <div>
             <div className="mb-4">
               <h2 className="text-xl font-semibold text-foreground mb-4">
-                Bank transactions
+                Bankbuchungen
               </h2>
 
               {/* Filter bar */}
               <div className="flex gap-3 mb-4">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[200px] bg-card">
-                    <SelectValue placeholder="Filter by status" />
+                  <SelectTrigger className="w-[220px] bg-card">
+                    <SelectValue placeholder="Nach Status filtern" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="unmatched">Unmatched</SelectItem>
-                    <SelectItem value="suggestion">With suggestion</SelectItem>
-                    <SelectItem value="matched">Matched</SelectItem>
-                    <SelectItem value="waiting">Waiting for client</SelectItem>
+                    <SelectItem value="all">Alle</SelectItem>
+                    <SelectItem value="unmatched">Nicht zugeordnet</SelectItem>
+                    <SelectItem value="suggestion">Mit Vorschlag</SelectItem>
+                    <SelectItem value="matched">Zugeordnet</SelectItem>
+                    <SelectItem value="waiting">Wartet auf Mandanten</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by description or amount…"
+                    placeholder="Nach Beschreibung oder Betrag suchen…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 bg-card"
@@ -303,17 +303,17 @@ Your Tax Office`;
             {selectedIds.size > 0 && (
               <div className="flex items-center justify-between p-3 bg-secondary/30 border border-border rounded-md mb-4">
                 <span className="text-sm font-medium">
-                  {selectedIds.size} transaction{selectedIds.size > 1 ? "s" : ""} selected
+                  {selectedIds.size} Buchung{selectedIds.size > 1 ? "en" : ""} ausgewählt
                 </span>
                 <div className="flex gap-2">
                   <Button onClick={handleGenerateRequest}>
-                    Generate request to client
+                    Anfrage an Mandanten erstellen
                   </Button>
                   <Button
                     variant="ghost"
                     onClick={() => setSelectedIds(new Set())}
                   >
-                    Clear selection
+                    Auswahl aufheben
                   </Button>
                 </div>
               </div>
@@ -333,9 +333,9 @@ Your Tax Office`;
                         onCheckedChange={handleSelectAll}
                       />
                     </TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Description</TableHead>
+                    <TableHead>Datum</TableHead>
+                    <TableHead>Betrag</TableHead>
+                    <TableHead>Beschreibung</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -393,33 +393,26 @@ Your Tax Office`;
           {/* Right panel - Match details */}
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-4">
-              Match details
+              Zuordnungsdetails
             </h2>
 
             {/* Selected transaction details */}
             <Card className="bg-card border-border mb-4">
               <CardHeader>
-                <CardTitle className="text-lg">Transaction details</CardTitle>
+                <CardTitle className="text-lg">Buchungsdetails</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Date:</span>
-                  <span className="text-sm font-medium">
-                    {new Date(selectedTransaction.date).toLocaleDateString(
-                      "de-DE",
-                      { day: "2-digit", month: "2-digit", year: "numeric" }
-                    )}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Datum:</span>
+...
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Amount:</span>
-                  <span className="text-sm font-semibold">
-                    €{selectedTransaction.amount.toFixed(2)}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Betrag:</span>
+...
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">
-                    Description:
+                    Beschreibung:
                   </span>
                   <span className="text-sm font-medium text-right max-w-[200px]">
                     {selectedTransaction.description}
@@ -514,22 +507,22 @@ Your Tax Office`;
             {!selectedTransaction.suggestedReceipt && (
               <Card className="bg-card border-border mb-4">
                 <CardHeader>
-                  <CardTitle className="text-lg">No suggested receipt</CardTitle>
+                  <CardTitle className="text-lg">Kein vorgeschlagener Beleg</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    No receipt suggestion found for this transaction.
+                    Für diese Buchung wurde kein Beleg vorgeschlagen.
                   </p>
                   <div className="space-y-2">
                     <Button variant="outline" className="w-full">
-                      Select receipt manually
+                      Beleg manuell auswählen
                     </Button>
                     <div className="flex gap-2">
                       <Button variant="ghost" className="flex-1 text-xs">
-                        Mark as cash payment
+                        Als Barzahlung markieren
                       </Button>
                       <Button variant="ghost" className="flex-1 text-xs">
-                        Mark as not relevant
+                        Als nicht relevant markieren
                       </Button>
                     </div>
                   </div>
@@ -541,24 +534,16 @@ Your Tax Office`;
             {selectedTransaction.status === "waiting" && selectedTransaction.lastRequest && (
               <Card className="bg-card border-border mb-4">
                 <CardHeader>
-                  <CardTitle className="text-lg">Client request</CardTitle>
+                  <CardTitle className="text-lg">Mandantenanfrage</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <span className="text-sm text-muted-foreground">Last request sent:</span>
-                    <span className="text-sm font-medium ml-2">
-                      {new Date(selectedTransaction.lastRequest.timestamp).toLocaleString("de-DE", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <span className="text-sm text-muted-foreground">Letzte Anfrage gesendet:</span>
+...
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground mb-2 block">
-                      Message sent:
+                      Gesendete Nachricht:
                     </label>
                     <Textarea
                       readOnly
@@ -576,7 +561,7 @@ Your Tax Office`;
                 <Card className="bg-card border-border">
                   <CardHeader>
                     <CardTitle className="text-sm">
-                      Other available receipts
+                      Weitere verfügbare Belege
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -615,33 +600,33 @@ Your Tax Office`;
       <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
         <DialogContent className="bg-card border-border max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Generate request to client</DialogTitle>
+            <DialogTitle>Anfrage an Mandanten erstellen</DialogTitle>
             <DialogDescription>
-              Request missing receipts from {client?.name} for {selectedIds.size}{" "}
-              transaction{selectedIds.size > 1 ? "s" : ""}
+              Fehlende Belege von {client?.name} für {selectedIds.size}{" "}
+              Buchung{selectedIds.size > 1 ? "en" : ""} anfordern
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">
-                Message to client
+                Nachricht an Mandanten
               </label>
               <Textarea
                 value={requestMessage}
                 onChange={(e) => setRequestMessage(e.target.value)}
                 className="min-h-[300px] font-mono text-sm bg-background"
-                placeholder="Edit the message to send to the client..."
+                placeholder="Bearbeiten Sie die Nachricht, die an den Mandanten gesendet wird..."
               />
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsRequestModalOpen(false)}>
-              Cancel
+              Abbrechen
             </Button>
             <Button onClick={handleConfirmRequest}>
-              Confirm & mark as waiting
+              Bestätigen & als wartend markieren
             </Button>
           </DialogFooter>
         </DialogContent>
