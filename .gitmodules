@@ -1,0 +1,3 @@
+[submodule "services/belegbuch-match"]
+	path = services/belegbuch-match
+	url = https://github.com/TilovD/belegbuch-match
