@@ -1,0 +1,56 @@
+name: "Pages Deploy Frontend"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install
+        working-directory: frontend
+        run: npm ci || npm i
+
+      - name: Build (relative base)
+        working-directory: frontend
+        run: npm run build -- --base ./
+
+      - name: Prepare Pages artifact (SPA fallback + nojekyll)
+        run: |
+          DIST=frontend/dist
+          cp "$DIST/index.html" "$DIST/404.html" || true
+          touch "$DIST/.nojekyll"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "frontend/dist"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
