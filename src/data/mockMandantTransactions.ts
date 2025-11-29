@@ -7,10 +7,13 @@ export interface MandantTransaction {
   grossAmount: number;
   vatRate: number;
   vat: number;
-  classification: string;
+  classification: 'Geschäftlich' | 'Privat' | 'Gemischt';
   status: 'offen' | 'eingereicht' | 'erledigt';
   month: string;
   year: number;
+  isRecurring?: boolean;
+  notifyAdvisor?: boolean;
+  attachments?: string[];
 }
 
 export const mandantTransactions: MandantTransaction[] = [

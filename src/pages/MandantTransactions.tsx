@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,15 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -29,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Camera, FileUp } from "lucide-react";
 import { mandantTransactions, MandantTransaction } from "@/data/mockMandantTransactions";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,8 +46,13 @@ export default function MandantTransactions() {
   const [statusFilter, setStatusFilter] = useState<string>("open");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTransaction, setSelectedTransaction] = useState<MandantTransaction | null>(null);
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [uploadNote, setUploadNote] = useState("");
+  const [detailsPanelOpen, setDetailsPanelOpen] = useState(false);
+  
+  // Form state
+  const [editedClassification, setEditedClassification] = useState<'Geschäftlich' | 'Privat' | 'Gemischt'>('Geschäftlich');
+  const [editedIsRecurring, setEditedIsRecurring] = useState(false);
+  const [editedNotifyAdvisor, setEditedNotifyAdvisor] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(transaction => {
@@ -86,27 +90,56 @@ export default function MandantTransactions() {
     setSearchParams({});
   };
 
-  const handleOpenUploadDialog = (transaction: MandantTransaction) => {
+  const handleOpenDetailsPanel = (transaction: MandantTransaction) => {
     setSelectedTransaction(transaction);
-    setUploadDialogOpen(true);
-    setUploadNote("");
+    setEditedClassification(transaction.classification || 'Geschäftlich');
+    setEditedIsRecurring(transaction.isRecurring || false);
+    setEditedNotifyAdvisor(transaction.notifyAdvisor || false);
+    setUploadedFiles(transaction.attachments || []);
+    setDetailsPanelOpen(true);
   };
 
-  const handleUploadReceipt = () => {
+  const handleSaveTransaction = () => {
     if (selectedTransaction) {
       setTransactions(prev =>
         prev.map(t =>
           t.id === selectedTransaction.id
-            ? { ...t, status: 'eingereicht' as const }
+            ? {
+                ...t,
+                classification: editedClassification,
+                isRecurring: editedIsRecurring,
+                notifyAdvisor: editedNotifyAdvisor,
+                attachments: uploadedFiles,
+                status: uploadedFiles.length > 0 ? 'eingereicht' as const : t.status
+              }
             : t
         )
       );
       toast({
-        title: "Beleg hochgeladen",
-        description: "Der Beleg wurde erfolgreich an Ihre Kanzlei übermittelt.",
+        title: "Änderungen gespeichert",
+        description: uploadedFiles.length > 0 
+          ? "Der Beleg wurde erfolgreich hochgeladen und an Ihre Kanzlei übermittelt."
+          : "Ihre Änderungen wurden gespeichert.",
       });
-      setUploadDialogOpen(false);
+      setDetailsPanelOpen(false);
       setSelectedTransaction(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setDetailsPanelOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const fileNames = Array.from(files).map(f => f.name);
+      setUploadedFiles(prev => [...prev, ...fileNames]);
+      toast({
+        title: "Datei hinzugefügt",
+        description: `${fileNames.join(', ')} wurde hinzugefügt.`,
+      });
     }
   };
 
@@ -201,7 +234,11 @@ export default function MandantTransactions() {
               </TableHeader>
               <TableBody>
                 {filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
+                  <TableRow 
+                    key={transaction.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleOpenDetailsPanel(transaction)}
+                  >
                     <TableCell className="font-medium">
                       {formatDate(transaction.date)}
                     </TableCell>
@@ -235,12 +272,22 @@ export default function MandantTransactions() {
                       {transaction.status === 'offen' ? (
                         <Button
                           size="sm"
-                          onClick={() => handleOpenUploadDialog(transaction)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDetailsPanel(transaction);
+                          }}
                         >
                           + Beleg
                         </Button>
                       ) : (
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDetailsPanel(transaction);
+                          }}
+                        >
                           Beleg ansehen
                         </Button>
                       )}
@@ -252,74 +299,178 @@ export default function MandantTransactions() {
           </CardContent>
         </Card>
 
-        {/* Upload Dialog */}
-        <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Beleg hinzufügen</DialogTitle>
-              <DialogDescription>
-                Laden Sie den Beleg für diese Buchung hoch
-              </DialogDescription>
-            </DialogHeader>
+        {/* Details Panel */}
+        <Sheet open={detailsPanelOpen} onOpenChange={setDetailsPanelOpen}>
+          <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
+            <SheetHeader className="mb-6">
+              <SheetTitle>Vorgangsdetails</SheetTitle>
+              <SheetDescription>
+                Buchungsinformationen und Beleg-Upload
+              </SheetDescription>
+            </SheetHeader>
 
             {selectedTransaction && (
-              <div className="space-y-4 py-4">
-                {/* Transaction Summary */}
-                <div className="rounded-lg bg-muted p-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Datum:</span>
-                    <span className="font-medium">{formatDate(selectedTransaction.date)}</span>
+              <div className="space-y-6">
+                {/* Transaction Information Card */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{selectedTransaction.recipient}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {selectedTransaction.description}
+                        </p>
+                      </div>
+                      <div className="text-right text-sm text-muted-foreground">
+                        {formatDate(selectedTransaction.date)}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Brutto-Betrag:</span>
+                      <span className="font-medium text-destructive">
+                        {formatCurrency(selectedTransaction.grossAmount)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        Umsatzsteuer ({selectedTransaction.vatRate.toFixed(2)} %):
+                      </span>
+                      <span className="font-medium">
+                        {formatCurrency(selectedTransaction.vat)}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Receipt Upload Section */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">Beleg</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      <Card className="h-32 hover:bg-muted/50 transition-colors">
+                        <CardContent className="h-full flex flex-col items-center justify-center p-4 text-center">
+                          <FileUp className="h-8 w-8 mb-2 text-muted-foreground" />
+                          <p className="font-medium text-sm">Datei hochladen</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Datei auswählen oder hierher ziehen
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </label>
+                    <Card className="h-32 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <CardContent className="h-full flex flex-col items-center justify-center p-4 text-center">
+                        <Camera className="h-8 w-8 mb-2 text-muted-foreground" />
+                        <p className="font-medium text-sm">Mit Kamera scannen</p>
+                        <p className="text-xs text-muted-foreground mt-1">(simuliert)</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Empfänger:</span>
-                    <span className="font-medium">{selectedTransaction.recipient}</span>
+                  
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-sm font-medium">Hochgeladene Dateien:</p>
+                      {uploadedFiles.map((file, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-sm bg-muted p-2 rounded">
+                          <FileUp className="h-4 w-4" />
+                          <span className="flex-1">{file}</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Classification Section */}
+                <div className="space-y-3">
+                  <Label htmlFor="classification" className="text-base font-semibold">
+                    Klassifikation
+                  </Label>
+                  <Select
+                    value={editedClassification}
+                    onValueChange={(value) => setEditedClassification(value as any)}
+                  >
+                    <SelectTrigger id="classification">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Geschäftlich">Geschäftlich</SelectItem>
+                      <SelectItem value="Privat">Privat</SelectItem>
+                      <SelectItem value="Gemischt">Gemischt</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Additional Options Section */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Weitere Optionen</Label>
+                  
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="recurring"
+                      checked={editedIsRecurring}
+                      onCheckedChange={(checked) => setEditedIsRecurring(checked as boolean)}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                      <label
+                        htmlFor="recurring"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        Wiederkehrende Zahlung
+                      </label>
+                      <p className="text-xs text-muted-foreground">
+                        Zukünftige Zahlungen automatisch zuordnen (simuliert).
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Betrag:</span>
-                    <span className="font-medium text-destructive">
-                      {formatCurrency(selectedTransaction.grossAmount)}
-                    </span>
+
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="notify"
+                      checked={editedNotifyAdvisor}
+                      onCheckedChange={(checked) => setEditedNotifyAdvisor(checked as boolean)}
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                      <label
+                        htmlFor="notify"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        Steuerberater benachrichtigen
+                      </label>
+                      <p className="text-xs text-muted-foreground">
+                        Die Kanzlei wird über die vorgenommenen Änderungen informiert (simuliert).
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* File Upload */}
-                <div className="space-y-2">
-                  <Label>Beleg</Label>
-                  <div className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Datei hier ablegen oder klicken zum Auswählen
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      PDF, JPG, PNG (max. 20 MB)
-                    </p>
-                  </div>
-                </div>
-
-                {/* Note */}
-                <div className="space-y-2">
-                  <Label htmlFor="note">Hinweis an Ihre Kanzlei (optional)</Label>
-                  <Textarea
-                    id="note"
-                    placeholder="z.B. Hinweise zur Buchung oder fehlende Informationen…"
-                    value={uploadNote}
-                    onChange={(e) => setUploadNote(e.target.value)}
-                    rows={3}
-                  />
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-6 border-t">
+                  <Button variant="outline" onClick={handleCancelEdit}>
+                    Abbrechen
+                  </Button>
+                  <Button onClick={handleSaveTransaction}>
+                    Speichern
+                  </Button>
                 </div>
               </div>
             )}
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
-                Abbrechen
-              </Button>
-              <Button onClick={handleUploadReceipt}>
-                Beleg hochladen
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );

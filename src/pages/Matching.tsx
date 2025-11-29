@@ -555,6 +555,66 @@ Your Tax Office`;
               </Card>
             )}
 
+            {/* Information from Mandant */}
+            {(selectedTransaction.classification || 
+              selectedTransaction.isRecurring || 
+              selectedTransaction.notifyAdvisor || 
+              selectedTransaction.attachments?.length) && (
+              <Card className="bg-card border-border mb-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">Informationen vom Mandanten</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {selectedTransaction.classification && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm text-muted-foreground min-w-[140px]">
+                        Klassifikation:
+                      </span>
+                      <span className="text-sm font-medium">
+                        {selectedTransaction.classification}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {selectedTransaction.isRecurring && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        ✓ Als wiederkehrende Zahlung markiert.
+                      </span>
+                    </div>
+                  )}
+                  
+                  {selectedTransaction.notifyAdvisor && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        ✓ Mandant wünscht eine Rückmeldung der Kanzlei.
+                      </span>
+                    </div>
+                  )}
+                  
+                  {selectedTransaction.attachments && selectedTransaction.attachments.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-sm text-muted-foreground block">
+                        {selectedTransaction.attachments.length === 1 
+                          ? '1 Beleg von Mandant hochgeladen:'
+                          : `${selectedTransaction.attachments.length} Belege von Mandant hochgeladen:`
+                        }
+                      </span>
+                      <div className="space-y-1 ml-2">
+                        {selectedTransaction.attachments.map((file, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span className="text-sm text-primary hover:underline cursor-pointer">
+                              📎 {file}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Other available receipts */}
             {selectedTransaction.availableReceipts &&
               selectedTransaction.availableReceipts.length > 0 && (
