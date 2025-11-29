@@ -104,7 +104,7 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="space-y-3">
           {filteredClients.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))}
