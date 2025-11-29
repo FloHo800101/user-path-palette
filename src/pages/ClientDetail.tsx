@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { mockClients } from "@/data/mockClients";
 import { ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
 
 const ClientDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const client = mockClients.find((c) => c.id === id);
 
   if (!client) {
@@ -211,7 +212,12 @@ const ClientDetail = () => {
                         or invoices.
                       </p>
                     </div>
-                    <Button className="w-full">Go to matching</Button>
+                    <Button 
+                      className="w-full"
+                      onClick={() => navigate(`/clients/${id}/matching`)}
+                    >
+                      Go to matching
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
