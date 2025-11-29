@@ -237,7 +237,11 @@ const ClientDetail = () => {
                         transactions.
                       </p>
                     </div>
-                    <Button className="w-full" variant="outline">
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => navigate(`/clients/${id}/matching?filter=unmatched`)}
+                    >
                       Go to missing receipts
                     </Button>
                   </div>

@@ -1,4 +1,4 @@
-export type TransactionStatus = "matched" | "unmatched" | "suggestion";
+export type TransactionStatus = "matched" | "unmatched" | "suggestion" | "waiting";
 
 export interface Receipt {
   id: string;
@@ -171,7 +171,7 @@ export const mockTransactions: Transaction[] = [
     date: "2026-03-24",
     amount: 45.00,
     description: "PARKING GARAGE",
-    status: "unmatched",
+    status: "waiting",
     availableReceipts: [],
   },
   {
