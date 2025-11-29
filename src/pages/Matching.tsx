@@ -1,12 +1,22 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { mockClients } from "@/data/mockClients";
 import { mockTransactions, Transaction } from "@/data/mockTransactions";
-import { ChevronRight, Search, CheckCircle2, AlertCircle, HelpCircle } from "lucide-react";
+import { ChevronRight, Search, CheckCircle2, AlertCircle, HelpCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -33,12 +43,24 @@ import {
 
 const Matching = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const client = mockClients.find((c) => c.id === id);
+  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction>(
-    mockTransactions[2]
+    transactions[2]
   );
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+
+  // Initialize filter from URL params
+  useEffect(() => {
+    const filterParam = searchParams.get("filter");
+    if (filterParam) {
+      setStatusFilter(filterParam);
+    }
+  }, [searchParams]);
 
   if (!client) {
     return (
@@ -55,15 +77,16 @@ const Matching = () => {
     );
   }
 
-  const matchedCount = mockTransactions.filter((t) => t.status === "matched").length;
-  const totalCount = mockTransactions.length;
+  const matchedCount = transactions.filter((t) => t.status === "matched").length;
+  const totalCount = transactions.length;
 
-  const filteredTransactions = mockTransactions.filter((transaction) => {
+  const filteredTransactions = transactions.filter((transaction) => {
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "unmatched" && transaction.status === "unmatched") ||
+      (statusFilter === "unmatched" && (transaction.status === "unmatched" || transaction.status === "waiting")) ||
       (statusFilter === "suggestion" && transaction.status === "suggestion") ||
-      (statusFilter === "matched" && transaction.status === "matched");
+      (statusFilter === "matched" && transaction.status === "matched") ||
+      (statusFilter === "waiting" && transaction.status === "waiting");
 
     const matchesSearch =
       searchQuery === "" ||
@@ -72,6 +95,41 @@ const Matching = () => {
 
     return matchesStatus && matchesSearch;
   });
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(filteredTransactions.map((t) => t.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectTransaction = (transactionId: string, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked) {
+      newSelected.add(transactionId);
+    } else {
+      newSelected.delete(transactionId);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleGenerateRequest = () => {
+    setIsRequestModalOpen(true);
+  };
+
+  const handleConfirmRequest = () => {
+    // Update status of selected transactions to "waiting"
+    setTransactions((prev) =>
+      prev.map((t) =>
+        selectedIds.has(t.id) ? { ...t, status: "waiting" as const } : t
+      )
+    );
+    setSelectedIds(new Set());
+    setIsRequestModalOpen(false);
+  };
+
+  const selectedTransactions = transactions.filter((t) => selectedIds.has(t.id));
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -94,6 +152,13 @@ const Matching = () => {
           <Badge className="bg-warning/10 text-warning hover:bg-warning/20">
             <AlertCircle className="h-3 w-3 mr-1" />
             Unmatched
+          </Badge>
+        );
+      case "waiting":
+        return (
+          <Badge className="bg-muted text-muted-foreground hover:bg-muted/80">
+            <Clock className="h-3 w-3 mr-1" />
+            Waiting for client
           </Badge>
         );
       default:
@@ -186,6 +251,7 @@ const Matching = () => {
                     <SelectItem value="unmatched">Unmatched</SelectItem>
                     <SelectItem value="suggestion">With suggestion</SelectItem>
                     <SelectItem value="matched">Matched</SelectItem>
+                    <SelectItem value="waiting">Waiting for client</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -201,11 +267,40 @@ const Matching = () => {
               </div>
             </div>
 
+            {/* Bulk action bar */}
+            {selectedIds.size > 0 && (
+              <div className="flex items-center justify-between p-3 bg-secondary/30 border border-border rounded-md mb-4">
+                <span className="text-sm font-medium">
+                  {selectedIds.size} transaction{selectedIds.size > 1 ? "s" : ""} selected
+                </span>
+                <div className="flex gap-2">
+                  <Button onClick={handleGenerateRequest}>
+                    Generate request to client
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    Clear selection
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Transaction table */}
             <Card className="bg-card border-border">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-border">
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={
+                          filteredTransactions.length > 0 &&
+                          filteredTransactions.every((t) => selectedIds.has(t.id))
+                        }
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Description</TableHead>
@@ -216,27 +311,46 @@ const Matching = () => {
                   {filteredTransactions.map((transaction) => (
                     <TableRow
                       key={transaction.id}
-                      className={`cursor-pointer border-border ${
+                      className={`border-border ${
                         selectedTransaction.id === transaction.id
                           ? "bg-secondary/50"
                           : "hover:bg-secondary/30"
                       }`}
-                      onClick={() => setSelectedTransaction(transaction)}
                     >
-                      <TableCell className="font-medium">
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(transaction.id)}
+                          onCheckedChange={(checked) =>
+                            handleSelectTransaction(transaction.id, checked as boolean)
+                          }
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </TableCell>
+                      <TableCell
+                        className="font-medium cursor-pointer"
+                        onClick={() => setSelectedTransaction(transaction)}
+                      >
                         {new Date(transaction.date).toLocaleDateString("de-DE", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
                         })}
                       </TableCell>
-                      <TableCell className="font-semibold">
+                      <TableCell
+                        className="font-semibold cursor-pointer"
+                        onClick={() => setSelectedTransaction(transaction)}
+                      >
                         €{transaction.amount.toFixed(2)}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell
+                        className="text-sm cursor-pointer"
+                        onClick={() => setSelectedTransaction(transaction)}
+                      >
                         {transaction.description}
                       </TableCell>
-                      <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                      <TableCell onClick={() => setSelectedTransaction(transaction)}>
+                        {getStatusBadge(transaction.status)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -431,6 +545,59 @@ const Matching = () => {
           </div>
         </div>
       </main>
+
+      {/* Request generation modal */}
+      <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
+        <DialogContent className="bg-card border-border max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Generate request to client</DialogTitle>
+            <DialogDescription>
+              Request missing receipts from {client?.name} for {selectedIds.size}{" "}
+              transaction{selectedIds.size > 1 ? "s" : ""}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                Request preview
+              </label>
+              <Textarea
+                readOnly
+                value={`Dear ${client?.name},
+
+We are missing receipts for the following transactions in March 2026:
+
+${selectedTransactions
+  .map(
+    (t) =>
+      `• ${new Date(t.date).toLocaleDateString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })} - €${t.amount.toFixed(2)} - ${t.description}`
+  )
+  .join("\n")}
+
+Please provide the missing receipts at your earliest convenience.
+
+Best regards,
+Your Tax Office`}
+                className="min-h-[300px] font-mono text-sm bg-background"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRequestModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmRequest}>
+              Confirm & mark as waiting
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
