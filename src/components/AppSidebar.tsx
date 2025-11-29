@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Inbox, Settings, User } from "lucide-react";
+import { LayoutDashboard, Users, Inbox, Settings, Upload, FileText, CreditCard, FolderOpen } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
@@ -10,16 +10,28 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserSwitch } from "@/components/UserSwitch";
+import { useRole } from "@/contexts/RoleContext";
 
-const navigationItems = [
+const taxClerkNavigation = [
   { title: "Mandanten", url: "/", icon: Users },
   { title: "Posteingang", url: "/inbox", icon: Inbox },
   { title: "Dashboards", url: "/dashboards", icon: LayoutDashboard },
   { title: "Einstellungen", url: "/settings", icon: Settings },
 ];
 
+const clientNavigation = [
+  { title: "Dashboard", url: "/mandant/dashboard", icon: LayoutDashboard },
+  { title: "Beleg-Upload", url: "/mandant/upload", icon: Upload },
+  { title: "Konto-Vorgänge", url: "/mandant/transactions", icon: CreditCard },
+  { title: "Belege", url: "/mandant/receipts", icon: FileText },
+  { title: "Abos & Verträge", url: "/mandant/subscriptions", icon: FolderOpen },
+];
+
 export function AppSidebar() {
+  const { currentUser } = useRole();
+  const navigationItems = currentUser.role === 'tax-clerk' ? taxClerkNavigation : clientNavigation;
+
   return (
     <Sidebar className="border-r border-sidebar-border">
       <div className="p-6">
@@ -53,16 +65,8 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-center gap-3 px-4 py-3 border-t border-sidebar-border">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              SK
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-sidebar-foreground">Sabine Kramer</span>
-            <span className="text-xs text-muted-foreground">Steuerfachangestellte</span>
-          </div>
+        <div className="border-t border-sidebar-border">
+          <UserSwitch />
         </div>
       </SidebarFooter>
     </Sidebar>
