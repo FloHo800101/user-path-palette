@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, TrendingUp, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export type ClientStatus = "on-track" | "at-risk";
 
@@ -21,6 +22,7 @@ interface ClientCardProps {
 }
 
 export const ClientCard = ({ client }: ClientCardProps) => {
+  const navigate = useNavigate();
   const isAtRisk = client.status === "at-risk";
 
   return (
@@ -89,7 +91,7 @@ export const ClientCard = ({ client }: ClientCardProps) => {
               </>
             )}
           </Badge>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => navigate(`/clients/${client.id}`)}>
             Open client
           </Button>
         </div>
